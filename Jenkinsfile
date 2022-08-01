@@ -25,7 +25,8 @@ pipeline {
     stage('get dependencies') {
       steps {
         container('nodejs') {
-          sh 'npm install -g cnpm --registry=https://registry.npm.taobao.org'
+          #sh 'npm install -g cnpm --registry=https://registry.npm.taobao.org'
+          sh 'npm install -g cnpm'
           sh 'cnpm i --no-package-lock'
         }
 
