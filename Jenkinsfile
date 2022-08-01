@@ -41,7 +41,7 @@ pipeline {
     stage('build & push snapshot') {
       steps {
         container('nodejs') {
-          sh 'yarn build'
+          sh 'npm build'
           sh 'docker build -t $PRIVATE_REPO/$PROJECT/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
           withCredentials([usernamePassword(passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,credentialsId : "$DOCKERHUB_CREDENTIAL_ID" ,)]) {
             sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
