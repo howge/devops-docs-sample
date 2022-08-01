@@ -2,24 +2,24 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    app: kubesphere
-    component: ks-docs-sample-dev
+    app: send
+    component: send-dev
     tier: backend
-  name: ks-docs-sample-dev
-  namespace: kubesphere-docs-dev
+  name: send-dev
+  namespace: online-send-dev 
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
   selector:
     matchLabels:
-      app: kubesphere
-      component: ks-docs-sample-dev
+      app: send
+      component: send-dev
       tier: backend
   template:
     metadata:
       labels:
-        app: kubesphere
-        component: ks-docs-sample-dev
+        app: send
+        component: send-dev
         tier: backend
     spec:
       containers:
@@ -28,7 +28,7 @@ spec:
           value: js|html
         - name: CACHE_PUBLIC_EXPIRATION
           value: 3d
-        image: $DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER
+        image:  $PRIVATE_REPO/$PROJECT/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER
         imagePullPolicy: Always
         name: ks-docs
         ports:
