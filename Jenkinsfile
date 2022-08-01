@@ -8,11 +8,12 @@ pipeline {
      string(name:'TAG_NAME',defaultValue: '',description:'')
   }
   environment {
-    DOCKERHUB_CREDENTIAL_ID = 'dockerhub-id'
+    DOCKERHUB_CREDENTIAL_ID = 'harbor-id'
     GITHUB_CREDENTIAL_ID = 'github-id'
-    KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
-    DOCKERHUB_NAMESPACE = 'kubesphere'
-    GTIHUB_ACCOUNT = 'kubesphere'
+    KUBECONFIG_CREDENTIAL_ID = 'kube-id'
+    PRIVATE_REPO = '101.32.244.133'
+    PROJECT = 'nasimobi'
+    GTIHUB_ACCOUNT = 'howge'
     APP_NAME = 'devops-docs-sample'
   }
   stages {
@@ -42,10 +43,10 @@ pipeline {
       steps {
         container('nodejs') {
           sh 'yarn build'
-          sh 'docker build -t docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
+          sh 'docker build -t $PRIVATE_REPO/$PROJECT/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
           withCredentials([usernamePassword(passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,credentialsId : "$DOCKERHUB_CREDENTIAL_ID" ,)]) {
             sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
-            sh 'docker push  docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER '
+            sh 'docker push  $PRIVATE_REPO/$PROJECT/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER '
           }
         }
 
@@ -57,8 +58,8 @@ pipeline {
        }
        steps{
          container('nodejs'){
-           sh 'docker tag  docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:latest '
-           sh 'docker push  docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:latest '
+           sh 'docker tag  $PRIVATE_REPO/$PROJECT/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $PRIVATE_REPO/$PROJECT/$APP_NAME:latest '
+           sh 'docker push  $PRIVATE_REPO/$PROJECT/$APP_NAME:latest '
          }
        }
     }
@@ -81,13 +82,13 @@ pipeline {
          container('nodejs'){
          input(id: 'release-image-with-tag', message: 'release image with tag?')
            withCredentials([usernamePassword(credentialsId: "$GITHUB_CREDENTIAL_ID", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-             sh 'git config --global user.email "kubesphere@yunify.com" '
-             sh 'git config --global user.name "kubesphere" '
+             sh 'git config --global user.email "anthony@nasimobi.com" '
+             sh 'git config --global user.name "anthony" '
              sh 'git tag -a $TAG_NAME -m "$TAG_NAME" '
              sh 'git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/$GTIHUB_ACCOUNT/$APP_NAME.git --tags'
            }
-         sh 'docker tag  docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME '
-         sh 'docker push  docker.io/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME '
+         sh 'docker tag  $PRIVATE_REPO/$PROJECT/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $PRIVATE_REPO/$PROJECT/$APP_NAME:$TAG_NAME '
+         sh 'docker push  $PRIVATE_REPO/$PROJECT/$APP_NAME:$TAG_NAME '
          }
       }
     }
@@ -103,5 +104,4 @@ pipeline {
       }
     }
   }
-
 }
